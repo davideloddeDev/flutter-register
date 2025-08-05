@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
 import 'models/register_data.dart';
 
+// Variabile globale per l'endpoint del backend
+String? _globalRegisterEndpoint;
+
+// Funzioni per gestire l'endpoint globale
+void setGlobalRegisterEndpoint(String endpoint) {
+  _globalRegisterEndpoint = endpoint;
+}
+
+String? getGlobalRegisterEndpoint() {
+  return _globalRegisterEndpoint;
+}
+
 typedef RegisterCallback = void Function(RegisterData data);
 
 class RegisterForm extends StatefulWidget {
@@ -17,6 +29,8 @@ class RegisterForm extends StatefulWidget {
   final bool validateEmail;
   final bool validatePassword;
   final int minPasswordLength;
+  final double maxWidth;
+  final String? customEndpoint;
 
   const RegisterForm({
     Key? key,
@@ -33,6 +47,8 @@ class RegisterForm extends StatefulWidget {
     this.validateEmail = true,
     this.validatePassword = true,
     this.minPasswordLength = 6,
+    this.maxWidth = 400.0,
+    this.customEndpoint,
   }) : super(key: key);
 
   @override
@@ -95,102 +111,125 @@ class _RegisterFormState extends State<RegisterForm> {
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
       );
+
+      // Aggiungi informazioni sull'endpoint se disponibile
+      final endpoint = widget.customEndpoint ?? getGlobalRegisterEndpoint();
+      if (endpoint != null) {
+        print('Endpoint configurato: $endpoint');
+        // Qui potresti aggiungere la logica per chiamare l'API
+      }
+
       widget.onRegister(registerData);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: widget.padding ?? const EdgeInsets.all(16.0),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextFormField(
-              controller: _firstNameController,
-              decoration: widget.inputDecoration?.copyWith(
-                labelText: widget.firstNameLabel,
-              ) ?? InputDecoration(
-                labelText: widget.firstNameLabel,
-                border: const OutlineInputBorder(),
-                labelStyle: widget.labelStyle,
-              ),
-              validator: (value) => _validateRequired(value, 'il nome'),
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _lastNameController,
-              decoration: widget.inputDecoration?.copyWith(
-                labelText: widget.lastNameLabel,
-              ) ?? InputDecoration(
-                labelText: widget.lastNameLabel,
-                border: const OutlineInputBorder(),
-                labelStyle: widget.labelStyle,
-              ),
-              validator: (value) => _validateRequired(value, 'il cognome'),
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _emailController,
-              decoration: widget.inputDecoration?.copyWith(
-                labelText: widget.emailLabel,
-              ) ?? InputDecoration(
-                labelText: widget.emailLabel,
-                border: const OutlineInputBorder(),
-                labelStyle: widget.labelStyle,
-              ),
-              validator: _validateEmail,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _passwordController,
-              decoration: widget.inputDecoration?.copyWith(
-                labelText: widget.passwordLabel,
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _obscurePassword = !_obscurePassword;
-                    });
-                  },
-                ),
-              ) ?? InputDecoration(
-                labelText: widget.passwordLabel,
-                border: const OutlineInputBorder(),
-                labelStyle: widget.labelStyle,
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _obscurePassword = !_obscurePassword;
-                    });
-                  },
-                ),
-              ),
-              validator: _validatePassword,
-              obscureText: _obscurePassword,
-              textInputAction: TextInputAction.done,
-              onFieldSubmitted: (_) => _handleSubmit(),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _handleSubmit,
-              style: widget.buttonStyle,
-              child: Text(widget.registerButtonText!),
-            ),
-          ],
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: widget.maxWidth,
         ),
-      ),
-    );
+        child: Padding(
+          padding: widget.padding ?? const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextFormField(
+                  controller: _firstNameController,
+                  decoration: widget.inputDecoration?.copyWith(
+                        labelText: widget.firstNameLabel,
+                      ) ??
+                      InputDecoration(
+                        labelText: widget.firstNameLabel,
+                        border: const OutlineInputBorder(),
+                        labelStyle: widget.labelStyle,
+                      ),
+                  validator: (value) => _validateRequired(value, 'il nome'),
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _lastNameController,
+                  decoration: widget.inputDecoration?.copyWith(
+                        labelText: widget.lastNameLabel,
+                      ) ??
+                      InputDecoration(
+                        labelText: widget.lastNameLabel,
+                        border: const OutlineInputBorder(),
+                        labelStyle: widget.labelStyle,
+                      ),
+                  validator: (value) => _validateRequired(value, 'il cognome'),
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: widget.inputDecoration?.copyWith(
+                        labelText: widget.emailLabel,
+                      ) ??
+                      InputDecoration(
+                        labelText: widget.emailLabel,
+                        border: const OutlineInputBorder(),
+                        labelStyle: widget.labelStyle,
+                      ),
+                  validator: _validateEmail,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordController,
+                  decoration: widget.inputDecoration?.copyWith(
+                        labelText: widget.passwordLabel,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                      ) ??
+                      InputDecoration(
+                        labelText: widget.passwordLabel,
+                        border: const OutlineInputBorder(),
+                        labelStyle: widget.labelStyle,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                      ),
+                  validator: _validatePassword,
+                  obscureText: _obscurePassword,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => _handleSubmit(),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _handleSubmit,
+                  style: widget.buttonStyle,
+                  child: Text(widget.registerButtonText!),
+                ),
+              ], // children
+            ), // Column
+          ), // Form
+        ), // Padding
+      ), // ConstrainedBox
+    ); // Center
   }
 }
