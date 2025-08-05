@@ -8,6 +8,8 @@ Un componente Flutter riutilizzabile per creare form di registrazione con valida
 - ✅ Validazione automatica dell'email
 - ✅ Validazione della password con lunghezza minima configurabile
 - ✅ Mostra/nascondi password
+- ✅ **Larghezza massima configurabile** per design responsive
+- ✅ **Gestione endpoint backend** (globale e per singolo form)
 - ✅ Completamente personalizzabile (stili, etichette, decorazioni)
 - ✅ Gestione automatica della navigazione tra campi
 - ✅ Support per Material Design 3
@@ -35,6 +37,12 @@ flutter pub get
 import 'package:flutter/material.dart';
 import 'package:flutter_register_component/flutter_register_component.dart';
 
+void main() {
+  // Configura l'endpoint globale (opzionale)
+  setGlobalRegisterEndpoint('https://api.miodominio.com/register');
+  runApp(MyApp());
+}
+
 class MyRegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -48,6 +56,7 @@ class MyRegisterPage extends StatelessWidget {
           print('Cognome: ${data.lastName}');
           // Effettua la chiamata API, salva i dati, ecc.
         },
+        maxWidth: 400.0, // Larghezza massima (opzionale)
       ),
     );
   }
@@ -65,6 +74,8 @@ RegisterForm(
   lastNameLabel: 'Il tuo Cognome',
   registerButtonText: 'Crea Account',
   minPasswordLength: 8,
+  maxWidth: 500.0, // Larghezza massima personalizzata
+  customEndpoint: 'https://api-special.com/register-premium', // Endpoint specifico
   validateEmail: true,
   validatePassword: true,
   buttonStyle: ElevatedButton.styleFrom(
@@ -97,6 +108,8 @@ RegisterForm(
 | `firstNameLabel` | `String?` | `'Nome'` | Etichetta del campo nome |
 | `lastNameLabel` | `String?` | `'Cognome'` | Etichetta del campo cognome |
 | `registerButtonText` | `String?` | `'Registrati'` | Testo del pulsante di registrazione |
+| `maxWidth` | `double` | `400.0` | Larghezza massima del form |
+| `customEndpoint` | `String?` | `null` | Endpoint specifico per questo form |
 | `labelStyle` | `TextStyle?` | `null` | Stile delle etichette |
 | `inputDecoration` | `InputDecoration?` | `null` | Decorazione dei campi input |
 | `buttonStyle` | `ButtonStyle?` | `null` | Stile del pulsante |
@@ -120,17 +133,57 @@ class RegisterData {
 }
 ```
 
+## Gestione Endpoint Backend
+
+Il componente supporta due modi per configurare gli endpoint:
+
+### 1. Endpoint Globale
+```dart
+void main() {
+  // Configura una volta per tutta l'app
+  setGlobalRegisterEndpoint('https://api.miodominio.com/register');
+  runApp(MyApp());
+}
+
+// Tutti i form useranno questo endpoint
+RegisterForm(onRegister: _handleRegister)
+```
+
+### 2. Endpoint Personalizzato per Form
+```dart
+RegisterForm(
+  onRegister: _handleRegister,
+  customEndpoint: 'https://api-special.com/register-premium',
+  // Questo form userà l'endpoint specifico invece di quello globale
+)
+```
+
+### 3. Funzioni di Utility
+```dart
+// Imposta endpoint globale
+setGlobalRegisterEndpoint('https://api.example.com/register');
+
+// Ottieni endpoint corrente
+String? currentEndpoint = getGlobalRegisterEndpoint();
+```
+
 ## Esempio Completo
 
-Controlla la cartella `example/` per un esempio completo di utilizzo con diverse personalizzazioni.
+Controlla la cartella `test_app/` per un esempio completo di utilizzo con diverse personalizzazioni e funzionalità avanzate.
 
 Per eseguire l'esempio:
 
 ```bash
-cd example
+cd test_app
 flutter pub get
-flutter run
+flutter run -d chrome
 ```
+
+L'esempio mostra:
+- Form base con larghezza controllata
+- Form personalizzato con endpoint specifico
+- Configurazione di endpoint globale
+- Diverse personalizzazioni di stile
 
 ## Validazione
 
